@@ -1,0 +1,171 @@
+import java.util.*;
+import java.time.LocalDate;
+// Task class to represent individual tasks
+class Task {
+    private int taskId;
+    private String description;
+    private LocalDate dueDate;
+    private int priority;
+    private boolean completed;
+
+    // Constructor
+    public Task(int taskId, String description, LocalDate dueDate, int priority) {
+        this.taskId = taskId;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.priority = priority;
+        this.completed = false; // By default, task is not completed
+    }
+
+    // Getters and setters
+    public int getPriority() {
+        return priority;
+    }
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+    public boolean getCompleted(){
+        return completed;
+    }
+    public int getTaskId() {
+        return taskId;
+    }
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    // toString method to represent Task object as a string
+    @Override
+    public String toString() {
+        String status = null;
+        if(completed){
+           status = "done";
+        } else {
+            status = "not done";
+        }
+            return "Task:" + taskId +
+                    "\n" + description + '\n' +
+                    "Due " + dueDate + " | priority: " + priority +
+                    "\nStatus: " + status;
+    }
+}
+
+// TaskManager class to manage tasks
+class TaskManager {
+    private List<Task> tasks;
+
+    // Constructor
+    public TaskManager() {
+        this.tasks = new ArrayList<>();
+    }
+
+    // Method to add a new task
+    public void addTask(Task task) {
+        // If there's a task with the same priority, move it and all others after it one position back
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).getPriority() >= task.getPriority()) {
+                tasks.add(i, task);
+                return;
+            }
+            tasks.get(i).setPriority(i+1);
+        }
+        tasks.add(task); // If no task with the same or higher priority found, add at the end
+    }
+
+    // Method to mark a task as completed
+    public void markTaskAsCompleted(int taskId) {
+        for (Task task : tasks) {
+            if (task.getTaskId() == taskId && !task.getCompleted()) {
+                task.setCompleted(true);
+                System.out.println("Task with ID " + taskId + " marked as completed.");
+                return;
+            }
+        }
+        System.out.println("Task with ID " + taskId + " not found.");
+    }
+
+    // Method to view all tasks
+    public void viewAllTasks() {
+        if (tasks.isEmpty()) {
+            System.out.println("No tasks found.");
+            return;
+        }
+        System.out.println("All Tasks:");
+        for (Task task : tasks) {
+            System.out.println(task);
+        }
+    }
+
+    // Method to generate reports of tasks due today
+    public void generateReportDueToday() {
+        System.out.println("Tasks Due Today:");
+        boolean found = false;
+        LocalDate today = LocalDate.now();
+        for (Task task : tasks) {
+            if (task.getDueDate().equals(today)) {
+                System.out.println(task);
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No tasks due today.");
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        TaskManager taskManager = new TaskManager();
+        Scanner Bob = new Scanner(System.in);
+            boolean o = true;
+            int counter = 0;
+            while (o) {
+                try {
+                    System.out.println("Menu:\n1. Add a task\n2. Show tasks\n3. Check off task\n4. Report\nDefault: Quit");
+                    int banana = Bob.nextInt();
+                    switch (banana) {
+                        case 1:
+                            // Adding tasks
+                            counter++;
+                            System.out.println("What is the description of your task?");
+                            String descrip = Bob.nextLine();
+                            descrip = Bob.nextLine();
+                            System.out.println("In how many days is it due?");
+                            int day = Bob.nextInt();
+                            System.out.println("Set your priority for the task with a ranking number");
+                            int priority = Bob.nextInt();
+                            taskManager.addTask(new Task(counter, descrip, LocalDate.now().plusDays(day), priority));
+                            break;
+                        case 2:
+                            // Viewing all tasks
+                            taskManager.viewAllTasks();
+                            break;
+                        case 3:
+                            // Marking a task as completed
+                            System.out.println("Which task have you completed?(ID)");
+                            int id = Bob.nextInt();
+                            taskManager.markTaskAsCompleted(id);
+                            break;
+                        case 4:
+                            // Generating report of tasks due today
+                            taskManager.generateReportDueToday();
+                            break;
+                        default:
+                            //Exit
+                            System.out.println("Are you sure you want to leave? Press 'Y' to continue.");
+                            String y = Bob.nextLine();
+                            if (y == "y" || y == "Y") {
+                                o = false;
+                            }
+                            break;
+                    }
+                }catch(InputMismatchException ime) {
+                    System.out.println("Make sure to give an integer when required.");
+                    Bob.next();
+                }
+            }
+    }
+}
